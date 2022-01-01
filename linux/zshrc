@@ -28,7 +28,7 @@ if [ -d "$HOME/.poetry/bin" ] ; then
 fi
 
 # ssh agent
-[[ "x${SSH_AGENT_PID}" != 'x' ]] || eval `ssh-agent -s`
+[[ "x${SSH_AGENT_PID}" != 'x' ]] || eval `ssh-agent -s` &> /dev/null
 
 # autocompleters
 if command -v kubectl &> /dev/null ; then
