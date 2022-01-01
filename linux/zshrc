@@ -27,3 +27,11 @@ if [ -d "$HOME/.poetry/bin" ] ; then
     export PATH="$HOME/.poetry/bin:$PATH"
 fi
 
+# ssh agent
+[[ "x${SSH_AGENT_PID}" != 'x' ]] || eval `ssh-agent -s`
+
+# autocompleters
+if command -v kubectl &> /dev/null ; then
+    source <(kubectl completion zsh)
+fi
+
