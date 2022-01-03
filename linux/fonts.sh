@@ -4,6 +4,11 @@ fontDir="$HOME/.local/share/fonts"
 tmpDir=`mktemp -d`
 mkdir $tmpDir/ttf
 
+if ! command -v fc-list &>/dev/null ; then
+    >&2 echo "fc-list not found"
+    exit 1
+fi
+
 # firacode NF
 echo "checking firacode nf"
 if ! grep -qi "FiraCode NF" <(fc-list) ; then
