@@ -7,7 +7,7 @@ if(-not (Test-Path -Path $ompBinPath)) {
     $ompGhLatestReleaseUri = $ghLatestReleaseFmt -f 'JanDeDobbeleer/oh-my-posh'
     $ompGhLatestReleaseResult = Invoke-RestMethod -Uri $ompGhLatestReleaseUri
     $ompAssets = @($ompGhLatestReleaseResult.assets)
-    if($ompAssets.Count -eq 0) {
+    if($ompAssets.Count -gt 0) {
         $assetName = 'install-amd64.exe'
         $ompInstallerAsset = $ompAssets | sort-object -property 'id' -descending | where-object { $_.name -eq $assetName } | select -first 1
         if($ompInstallerAsset.browser_download_url) {
