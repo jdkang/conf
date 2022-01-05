@@ -28,15 +28,25 @@ if(-not (Test-Path -Path $ompBinPath)) {
     write-host "oh-my-posh already installed" -f yellow
 }
 
+# copy custom profile\
+$customProfileSrc = Join-Path $PsScriptRoot 'powerlevel10k_rainbow.omp-no-brackets.json'
+$customProfileTarget = Join-Path $Home 'powerlevel10k_rainbow.omp-no-brackets.json'
+if(-not (Test-Path -Path $customProfileTarget)) {
+    Copy-item -Path $customProfileSrc -Destination $customProfileTarget -Force
+}
+
 # add oh-my-posh to profile
 if ((gc $PROFILE -Raw) -notmatch 'oh-my-posh') {
   Add-Content -Path $PROFILE -Value @'
 
 # oh my posh
-$ompFolder = Join-Path $HOME 'AppData\Local\Programs\oh-my-posh'
-if(Test-Path -Path $ompFolder) {
-  $ompThemePath = Join-Path $ompFolder 'themes/powerlevel10k_rainbow.omp.json'
-  $ompBinPath = Join-Path $ompFolder 'bin/oh-my-posh.exe'
+$ompFolder = Join-Path $Home 'AppData\Local\Programs\oh-my-posh'
+$ompBinPath = Join-Path $ompFolder 'bin/oh-my-posh.exe'
+$ompThemePath = Join-Path $Home 'powerlevel10k_rainbow.omp-no-brackets.json'
+if(-not (Test-Path -Path $ompThemePath)) {
+    $ompThemePath = Join-Path $ompFolder 'themes/powerlevel10k_rainbow.omp.json'
+}
+if((Test-Path -Path $ompBinPath) -and (Test-Path -Path $ompThemePath)) {  
   & $ompBinPath --init --shell pwsh --config $ompThemePath | Invoke-Expression
 }
 '@
