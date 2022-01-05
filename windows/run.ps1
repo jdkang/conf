@@ -31,9 +31,7 @@ if(-not (Test-Path -Path $ompBinPath)) {
 # copy custom profile\
 $customProfileSrc = Join-Path $PsScriptRoot 'powerlevel10k_rainbow.omp-no-brackets.json'
 $customProfileTarget = Join-Path $Home 'powerlevel10k_rainbow.omp-no-brackets.json'
-if(-not (Test-Path -Path $customProfileTarget)) {
-    Copy-item -Path $customProfileSrc -Destination $customProfileTarget -Force
-}
+Copy-item -Path $customProfileSrc -Destination $customProfileTarget -Force
 
 # add oh-my-posh to profile
 if ((gc $PROFILE -Raw) -notmatch 'oh-my-posh') {
