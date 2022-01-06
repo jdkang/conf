@@ -1,7 +1,8 @@
 param(
     [Parameter(Mandatory=$False)]
-    [regex]
-    $FontAssetRegex = 'FiraCode\.zip$'
+    [ValidateScript({ $_ -match '^\w+$' })]
+    [string]
+    $FontZipName = 'FiraCode'
 )
 
 # ----------------------------------------------
@@ -30,16 +31,18 @@ param(
         if($asset.browser_download_url) {
             return $asset
         } else {
-            throw "cannot find assetg matching regex: $($AssetRegex)"
+            write-warning "cannot find assetg matching regex: $($AssetRegex)"
+            throw "font not found"
         }
     } else {
-        throw "cannot find latest gh release for: $($OrgRepo)"
+        write-warning "cannot find latest gh release for: $($OrgRepo)"
+        throw "latest release not found"
     }
 }
 function Install-Fonts {
 param(
     [Parameter(Mandatory=$True)]
-    [ValidateScript({ Test-Path -Path $_ -PathTyupe 'container' })]
+    [ValidateScript({ Test-Path -Path $_ -PathType 'container' })]
     [ValidateNotNullOrEmpty()]
     [string]
     $FolderPath,
@@ -84,11 +87,12 @@ param(
 # ----------------------------------------------
 # main
 # ----------------------------------------------
+$fontAssetRegex = $FontZipName + '\.zip$'
 $tempFolder = [System.IO.Path]::GetTempPath()
 $tempFontFolder = Join-Path $tempFolder "FiraCodeNF_$(get-date -f 'yyyyMMddHHmmss')"
 
 # download FiraCode nerd font
-$latestFiraCodeNfAsset = Get-LatestGithubArtifact -OrgRepo 'ryanoasis/nerd-fonts' -AssetRegex $FontAssetRegex
+$latestFiraCodeNfAsset = Get-LatestGithubArtifact -OrgRepo 'ryanoasis/nerd-fonts' -AssetRegex $fontAssetRegex
 if($latestFiraCodeNfAsset.browser_download_url) {
     $tempFile = Join-Path $tempFolder 'FiraCodeNF.zip'
     write-host "downloading FiraCode.zip $($latestFiraCodeNfAsset.browser_download_url)" -f green
