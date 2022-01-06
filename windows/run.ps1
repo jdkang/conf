@@ -1,26 +1,47 @@
+
+function Get-LatestGithubArtifact {
+param(
+    [Parameter(Mandatory=$True)]
+    [ValidateScript({ $_ -match '\w+\/\w+' })]
+    [ValidateNotNullOrEmpty()]
+    [string]
+    $OrgRepo,
+
+    [regex]
+    $AssetRegex
+)
+    $ghLatestReleaseFmt = 'https://api.github.com/repos/{0}/releases/latest'
+    $ghLatestUrl = $ghLatestReleaseFmt -f $OrgRepo
+    $ghLatestReleaseResult = Invoke-RestMethod -Uri $ghLatestUrl
+    $assets = @($ghLatestReleaseResult.assets)
+    if($assets.Count -gt 0) {
+        $asset = $assets |
+                 sort-object -property 'id' -descending |
+                 where-object { $_.name -match $AssetRegex } |
+                 select-object -first 1
+        if($asset.browser_download_url) {
+            return $asset
+        } else {
+            throw "cannot find assetg matching regex: $($AssetRegex)"
+        }
+    } else {
+        throw "cannot find latest gh release for: $($OrgRepo)"
+    }
+}
+
+
 # setup oh-my-posh
 $ompFolder = Join-Path $HOME 'AppData\Local\Programs\oh-my-posh'
 $ompBinPath = Join-Path $ompFolder 'bin/oh-my-posh.exe'
 if(-not (Test-Path -Path $ompBinPath)) {
-    $ompExeDownloadUrl = ""
-    $ghLatestReleaseFmt = 'https://api.github.com/repos/{0}/releases/latest'
-    $ompGhLatestReleaseUri = $ghLatestReleaseFmt -f 'JanDeDobbeleer/oh-my-posh'
-    $ompGhLatestReleaseResult = Invoke-RestMethod -Uri $ompGhLatestReleaseUri
-    $ompAssets = @($ompGhLatestReleaseResult.assets)
-    if($ompAssets.Count -gt 0) {
-        $assetName = 'install-amd64.exe'
-        $ompInstallerAsset = $ompAssets | sort-object -property 'id' -descending | where-object { $_.name -eq $assetName } | select -first 1
-        if($ompInstallerAsset.browser_download_url) {
-            $tempFolder = [System.IO.Path]::GetTempPath()
-            $tempFile = Join-Path $tempFolder $assetName
-            write-host "downloading oh-my-posh installer $($ompInstallerAsset.browser_download_url)" -f green
-            Invoke-RestMethod -Uri $ompInstallerAsset.browser_download_url -OutFile $tempFile
-            write-host "installing" -f green
-            & $tempFile /VERYSILENT
-            Get-ChildItem -Path $ompFolder
-        } else {
-            write-warning "cannot find oh-my-posh installer asset: $($ompGhLatestReleaseUri)"
-        }
+    $latestOmpAsset = Get-LatestGithubArtifact -OrgRepo 'JanDeDobbeleer/oh-my-posh' -AssetRegex '^install-amd64\.exe$'
+    if($latestOmpAsset.browser_download_url) {
+        $tempFolder = [System.IO.Path]::GetTempPath()
+        $tempFile = Join-Path $tempFolder 'installer_amd64.exe'
+        write-host "downloading oh-my-posh installer $($ompInstallerAsset.browser_download_url)" -f green
+        Invoke-RestMethod -Uri $latestOmpAsset.browser_download_url -OutFile $tempFile
+        write-host "installing" -f green
+        & $tempFile /VERYSILENT
     } else {
         write-warning "cannot locate oh-my-posh latest assets: $($ompGhLatestReleaseUri)"
     }
@@ -51,3 +72,26 @@ if((Test-Path -Path $ompBinPath) -and (Test-Path -Path $ompThemePath)) {
 } else {
     write-host "profile alreayd setup for oh-my-posh" -f yellow
 }
+
+# cmder mini
+$cmderFolder = Join-Path $HOME 'cmder'
+$cmderBinPath = Join-Path $cmderFolder 'Cmder.exe'
+if(-not (Test-Path -Path $cmderBinPath)) {
+    $latestCmderMiniAsset = Get-LatestGithubArtifact -OrgRepo 'cmderdev/cmder' -AssetRegex '^cmder_mini\.zip$'
+    if($latestCmderMiniAsset.browser_download_url) {
+        $tempFolder = [System.IO.Path]::GetTempPath()
+        $tempFile = Join-Path $tempFolder 'cmder_mini.zip'
+        write-host "downloading cmder minmi zip $($latestCmderMiniAsset.browser_download_url)" -f green
+        Invoke-RestMethod -Uri $latestCmderMiniAsset.browser_download_url -OutFile $tempFile
+        write-host "unpacking" -f green
+        Expand-Archive -Path $tempFile -DestinationPath $cmderFolder -Force
+    } else {
+        write-warning "cannot locate cmder latest assets: $($ompGhLatestReleaseUri)"
+    }
+} else {
+    write-host "cmder already installed" -f yellow
+}
+
+# copy ConEmu.xml
+$cmderConEmuXmlPath = Join-Path $cmderFolder 'vendor/conemu-maximus5/ConEmu.xml'
+Copy-Item -Path "$($PsScriptRoot)/ConEmu.xml" -Destination $cmderConEmuXmlPath -Force
