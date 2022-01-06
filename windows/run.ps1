@@ -93,5 +93,5 @@ if(-not (Test-Path -Path $cmderBinPath)) {
 }
 
 # copy ConEmu.xml
-$cmderConEmuXmlPath = Join-Path $cmderFolder 'vendor/conemu-maximus5/ConEmu.xml'
+$cmderConEmuXmlPath = Join-Path $cmderFolder 'config/user-ConEmu.xml'
 Copy-Item -Path "$($PsScriptRoot)/ConEmu.xml" -Destination $cmderConEmuXmlPath -Force
