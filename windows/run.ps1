@@ -1,4 +1,6 @@
-
+# ----------------------------------------------
+# func
+# ----------------------------------------------
 function Get-LatestGithubArtifact {
 param(
     [Parameter(Mandatory=$True)]
@@ -29,7 +31,9 @@ param(
     }
 }
 
-
+# ----------------------------------------------
+# main
+# ----------------------------------------------
 # setup oh-my-posh
 $ompFolder = Join-Path $HOME 'AppData\Local\Programs\oh-my-posh'
 $ompBinPath = Join-Path $ompFolder 'bin/oh-my-posh.exe'
@@ -49,14 +53,16 @@ if(-not (Test-Path -Path $ompBinPath)) {
     write-host "oh-my-posh already installed" -f yellow
 }
 
-# copy custom profile\
+# copy custom profile
+write-host "copying powerlevel10k config"
 $customProfileSrc = Join-Path $PsScriptRoot 'powerlevel10k_rainbow.omp-no-brackets.json'
 $customProfileTarget = Join-Path $Home 'powerlevel10k_rainbow.omp-no-brackets.json'
 Copy-item -Path $customProfileSrc -Destination $customProfileTarget -Force
 
 # add oh-my-posh to profile
 if ((gc $PROFILE -Raw) -notmatch 'oh-my-posh') {
-  Add-Content -Path $PROFILE -Value @'
+    write-host "appending oh-my-posh to powershell profile"
+    Add-Content -Path $PROFILE -Value @'
 
 # oh my posh
 $ompFolder = Join-Path $Home 'AppData\Local\Programs\oh-my-posh'
@@ -93,5 +99,18 @@ if(-not (Test-Path -Path $cmderBinPath)) {
 }
 
 # copy ConEmu.xml
+write-host "copying cmder conemu.xml"
 $cmderConEmuXmlPath = Join-Path $cmderFolder 'config/user-ConEmu.xml'
 Copy-Item -Path "$($PsScriptRoot)/ConEmu.xml" -Destination $cmderConEmuXmlPath -Force
+
+# conemu shortcut
+$cmderDesktopShortcutPath = "$($Home)\Desktop\Cmder.lnk"
+if(-not (Test-Path -Path $cmderDesktopShortcutPath)) {
+    write-host "creating cmder desktop shortcut" -f yellow
+    $WshShell = New-Object -comObject WScript.Shell
+    $Shortcut = $WshShell.CreateShortcut($cmderDesktopShortcutPath)
+    $Shortcut.TargetPath = $cmderBinPath
+    $Shortcut.Save()
+} else {
+    write-host "cmder desktop shortcut already exists" -f yellow
+}
