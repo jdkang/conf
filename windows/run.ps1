@@ -76,7 +76,7 @@ if((Test-Path -Path $ompBinPath) -and (Test-Path -Path $ompThemePath)) {
 }
 '@
 } else {
-    write-host "profile alreayd setup for oh-my-posh" -f yellow
+    write-host "profile already setup for oh-my-posh" -f yellow
 }
 
 # cmder mini
