@@ -1,5 +1,5 @@
 param(
-    [Parameter(Mandatory=$False)]
+    [Parameter(Mandatory=$False,Position=0)]
     [ValidateScript({ $_ -match '^\w+$' })]
     [string]
     $FontZipName = 'FiraCode'
