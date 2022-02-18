@@ -35,7 +35,12 @@ then
 fi
 
 # autocompleters
+autoload bashcompinit && bashcompinit
+autoload -Uz compinit && compinit
 if command -v kubectl &> /dev/null ; then
     source <(kubectl completion zsh)
+fi
+if command -v aws_completer &> /dev/null ; then
+    complete -C 'aws_completer' aws
 fi
 
