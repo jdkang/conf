@@ -27,6 +27,11 @@ if [ -d "$HOME/.poetry/bin" ] ; then
     export PATH="$HOME/.poetry/bin:$PATH"
 fi
 
+# go
+if [ -d "/usr/local/go/bin" ] ; then
+    export PATH="$PATH:/usr/local/go/bin"
+fi
+
 # ssh agent
 if [[ "x$(command -v 'ssh-agent')" != 'x' ]] &&\
    [[ "x${SSH_AGENT_PID}" == 'x' ]]
